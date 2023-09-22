@@ -1,118 +1,87 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import 'fast-text-encoding';
+import 'react-native-url-polyfill/auto';
+import React, {useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
+  FlatList,
   SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from 'react-native';
+import {http, HttpResponse, passthrough} from 'msw';
+import {setupServer} from 'msw/native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
+type Movie = {
+  id: string;
   title: string;
-}>;
+  releaseYear: string;
+};
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+(global as any).location = {href: 'https://reactnative.dev'};
 
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const handlers = [
+  http.get('https://reactnative.dev/movies.json', async () => {
+    return HttpResponse.json(
+      {
+        title: 'The Basics - Networking',
+        description: 'Your app fetched this from a remote endpoint!',
+        movies: [
+          {id: '1', title: 'Star Wars', releaseYear: '1977'},
+          {id: '2', title: 'Back to the Future', releaseYear: '1985'},
+          {id: '3', title: 'The Matrix', releaseYear: '1999'},
+          {id: '4', title: 'Inception', releaseYear: '2010'},
+          {id: '5', title: 'Interstellar', releaseYear: '2014'},
+        ],
+      },
+      {status: 200, headers: {'Content-Type': 'application/json'}},
+    );
+  }),
+  http.all('http://localhost:8081/*', passthrough),
+  http.all('http://10.0.2.2:8081/*', passthrough),
+];
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+const server = setupServer(...handlers);
+server.listen();
+
+const App = () => {
+  const [isLoading, setLoading] = useState(true);
+  const [data, setData] = useState<Movie[]>([]);
+
+  const getMovies = async () => {
+    try {
+      const response = await fetch('https://reactnative.dev/movies.json');
+      const json = await response.json();
+      setData(json.movies);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    getMovies();
+  }, []);
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={{flex: 1, padding: 24}}>
+        {isLoading ? (
+          <ActivityIndicator />
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={({id}) => id}
+            renderItem={({item}) => (
+              <Text>
+                {item.title}, {item.releaseYear}
+              </Text>
+            )}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+};
 
 export default App;
