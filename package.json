@@ -10,8 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "events": "^3.3.0",
     "fast-text-encoding": "^1.0.6",
-    "msw": "0.0.0-fetch.rc-20",
+    "msw": "^0.0.0-fetch.rc-21",
     "react": "18.2.0",
     "react-native": "0.72.4",
     "react-native-url-polyfill": "^2.0.0"
