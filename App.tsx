@@ -17,8 +17,6 @@ type Movie = {
   releaseYear: string;
 };
 
-(global as any).location = {href: 'https://reactnative.dev'};
-
 const handlers = [
   http.get('https://reactnative.dev/movies.json', async () => {
     return HttpResponse.json(
