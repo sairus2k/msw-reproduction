@@ -1,0 +1,39 @@
+diff --git a/node_modules/@mswjs/interceptors/lib/browser/chunk-D3X43XAK.js b/node_modules/@mswjs/interceptors/lib/browser/chunk-D3X43XAK.js
+index 826a4c7..f5ca9e9 100644
+--- a/node_modules/@mswjs/interceptors/lib/browser/chunk-D3X43XAK.js
++++ b/node_modules/@mswjs/interceptors/lib/browser/chunk-D3X43XAK.js
+@@ -69,13 +69,16 @@ var _FetchInterceptor = class extends _chunk3O7223NMjs.Interceptor {
+       this.logger.info("awaiting for the mocked response...");
+       const signal = interactiveRequest.signal;
+       const requestAborted = new (0, _deferredpromise.DeferredPromise)();
+-      signal.addEventListener(
+-        "abort",
+-        () => {
+-          requestAborted.reject(signal.reason);
+-        },
+-        { once: true }
+-      );
++      // Signal isn't always defined in react-native.
++      if (signal) {
++        signal.addEventListener(
++          "abort",
++          () => {
++            requestAborted.reject(signal.reason);
++          },
++          { once: true }
++        );
++      }
+       const resolverResult = await _until.until.call(void 0, async () => {
+         const listenersFinished = _chunkQMV2V6GVjs.emitAsync.call(void 0, this.emitter, "request", {
+           request: interactiveRequest,
+@@ -116,7 +119,9 @@ var _FetchInterceptor = class extends _chunk3O7223NMjs.Interceptor {
+           request: interactiveRequest,
+           requestId
+         });
+-        const response = new Response(mockedResponse.body, mockedResponse);
++        // const response = new Response(mockedResponse.body, mockedResponse);
++        // response.body is undefined in react-native.
++        const response = mockedResponse.clone();
+         Object.defineProperty(response, "url", {
+           writable: false,
+           enumerable: true,

@@ -1,0 +1,22 @@
+diff --git a/node_modules/msw/lib/native/index.js b/node_modules/msw/lib/native/index.js
+index b0f1b23..55aaeee 100644
+--- a/node_modules/msw/lib/native/index.js
++++ b/node_modules/msw/lib/native/index.js
+@@ -23,7 +23,7 @@ __export(native_exports, {
+   setupServer: () => setupServer
+ });
+ module.exports = __toCommonJS(native_exports);
+-var import_XMLHttpRequest = require("@mswjs/interceptors/XMLHttpRequest");
++var import_fetch = require("@mswjs/interceptors/fetch");
+ 
+ // src/node/SetupServerApi.ts
+ var import_interceptors = require("@mswjs/interceptors");
+@@ -104,7 +104,7 @@ var SetupServerApi = class extends import_SetupApi.SetupApi {
+ 
+ // src/native/index.ts
+ function setupServer(...handlers) {
+-  return new SetupServerApi([import_XMLHttpRequest.XMLHttpRequestInterceptor], ...handlers);
++  return new SetupServerApi([import_fetch.FetchInterceptor], ...handlers);
+ }
+ // Annotate the CommonJS export names for ESM import in node:
+ 0 && (module.exports = {
